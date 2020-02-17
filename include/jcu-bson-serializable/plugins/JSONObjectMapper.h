@@ -39,57 +39,55 @@
 
 namespace jcu {
     namespace bson {
-        namespace serializable {
 
 #ifdef HAS_RAPIDJSON
-            class JSONObjectMapper {
-            public:
-                class TypeNotSupportException : public std::exception {};
-                class ConvertException : public std::exception {};
+        class JSONObjectMapper {
+        public:
+            class TypeNotSupportException : public std::exception {};
+            class ConvertException : public std::exception {};
 
-            private:
-                struct ConvertContext : public internal::BsonParseHandler {
-                    internal::BsonTypes bsonType;
-                    rapidjson::Document &doc;
-                    ConvertContext(rapidjson::Document &_document, internal::BsonTypes _bsonType)
-                        : doc(_document), bsonType(_bsonType) {
-                        if (_bsonType == internal::BSONTYPE_DOCUMENT)
-                            doc.SetObject();
-                        else if (_bsonType == internal::BSONTYPE_ARRAY)
-                            doc.SetArray();
-                    }
-                    bool bsonParseHandle(uint8_t type,
-                                         const std::string &name,
-                                         const std::vector<unsigned char> &payload,
-                                         uint32_t *offset,
-                                         uint32_t docEndPos) throw(TypeNotSupportException, ConvertException) override;
-                    void serializableNameHandle(const std::string &attrName, const std::string &value) override;
-                    void serializableSerialVersionUIDHandle(const std::string &attrName, int64_t value) override;
-                };
-
-            public:
-                void serializeTo(const Serializable *serialiable, rapidjson::Document &jsonDoc) throw(TypeNotSupportException, ConvertException);
-                void deserializeJsonObject(Serializable *serialiable, const rapidjson::Value &jsonObject) throw(TypeNotSupportException, ConvertException);
-
-                std::string serialize(const Serializable *serialiable) throw(TypeNotSupportException, ConvertException)
-                {
-                    rapidjson::Document jsonDoc;
-                    rapidjson::StringBuffer jsonBuf;
-                    rapidjson::Writer<rapidjson::StringBuffer> jsonWriter(jsonBuf);
-                    serializeTo(serialiable, jsonDoc);
-                    jsonDoc.Accept(jsonWriter);
-                    return std::string(jsonBuf.GetString(), jsonBuf.GetLength());
+        private:
+            struct ConvertContext : public internal::BsonParseHandler {
+                internal::BsonTypes bsonType;
+                rapidjson::Document &doc;
+                ConvertContext(rapidjson::Document &_document, internal::BsonTypes _bsonType)
+                    : doc(_document), bsonType(_bsonType) {
+                    if (_bsonType == internal::BSONTYPE_DOCUMENT)
+                        doc.SetObject();
+                    else if (_bsonType == internal::BSONTYPE_ARRAY)
+                        doc.SetArray();
                 }
-
-                void deserialize(Serializable *serialiable, const std::string &json) throw(TypeNotSupportException, ConvertException)
-                {
-                    rapidjson::Document jsonDoc;
-                    jsonDoc.Parse(json.c_str(), json.length());
-                    deserializeJsonObject(serialiable, jsonDoc);
-                }
+                bool bsonParseHandle(uint8_t type,
+                                     const std::string &name,
+                                     const std::vector<unsigned char> &payload,
+                                     uint32_t *offset,
+                                     uint32_t docEndPos) throw(TypeNotSupportException, ConvertException) override;
+                void serializableNameHandle(const std::string &attrName, const std::string &value) override;
+                void serializableSerialVersionUIDHandle(const std::string &attrName, int64_t value) override;
             };
+
+        public:
+            void serializeTo(const Serializable *serialiable, rapidjson::Document &jsonDoc) throw(TypeNotSupportException, ConvertException);
+            void deserializeJsonObject(Serializable *serialiable, const rapidjson::Value &jsonObject) throw(TypeNotSupportException, ConvertException);
+
+            std::string serialize(const Serializable *serialiable) throw(TypeNotSupportException, ConvertException)
+            {
+                rapidjson::Document jsonDoc;
+                rapidjson::StringBuffer jsonBuf;
+                rapidjson::Writer<rapidjson::StringBuffer> jsonWriter(jsonBuf);
+                serializeTo(serialiable, jsonDoc);
+                jsonDoc.Accept(jsonWriter);
+                return std::string(jsonBuf.GetString(), jsonBuf.GetLength());
+            }
+
+            void deserialize(Serializable *serialiable, const std::string &json) throw(TypeNotSupportException, ConvertException)
+            {
+                rapidjson::Document jsonDoc;
+                jsonDoc.Parse(json.c_str(), json.length());
+                deserializeJsonObject(serialiable, jsonDoc);
+            }
+        };
 #endif
-        }
     }
 }
 

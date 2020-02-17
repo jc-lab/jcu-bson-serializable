@@ -22,7 +22,7 @@
  *             This software may be modified and distributed under the terms
  *            of the Apache License 2.0.  See the LICENSE file for details.
  */
- 
+
 #include "jcu-bson-serializable/plugins/JSONObjectMapper.h"
 
 #ifdef HAS_RAPIDJSON
@@ -37,7 +37,6 @@
 
 namespace jcu {
     namespace bson {
-        namespace serializable {
 
             template<typename T>
             static uint32_t writeValueToBson(std::vector<unsigned char> &payload, const T &value);
@@ -348,7 +347,6 @@ namespace jcu {
                 }
                 return true;
             }
-        }
     }
 }
 
